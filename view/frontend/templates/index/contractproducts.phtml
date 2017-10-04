@@ -1,0 +1,288 @@
+<style>
+.box.box-information{margin-top: 20px; border-bottom: 1px solid #c6c6c6}
+.products {margin: 0px 0;}
+.products-list .product-image-container {width: 70px !important;}
+.products-list .product-item-name {margin: 10px 0; float:left;}
+.products-list .product-item .price-box {float:right;}
+.products-list .product-item-inner {float:right; margin-top:5px;}
+.products-list .product-item-photo {padding: 0px;}
+.products-list  .product-item {border-bottom: 1px solid #c6c6c6 }
+.products-list .actions-primary {float:left;}
+.products-list .tocart {margin-left:5px; margin-right: 5px; margin-top: -2px;}
+
+.products-list .qtybutton {margin-top: -3px; height: 35px; background: lightgrey !important; border: 1 px solid lightgrey; border-radius: 3px;  -ms-user-select: none;  user-select: none;  -webkit-user-select: none;}
+.products-list .control {width: 350px;}
+.products-list .sku {clear:left;}
+.col-3 b {float: left;  margin-right: 10px;}
+#alladd {margin-top: 10px; float: right;}
+@media screen and (max-width: 390px) {
+	.products-list .tocart {display: block; margin-top: 5px; margin-bottom: 10px; width: 124px !important; margin-left: 0px;}
+	.control {width: auto !important; float: left;}
+}
+</style>
+<script>
+require(['jquery', 'jquery/ui'], function($){ 
+
+	var total = 0;
+	//var url      = window.location.href;
+	//var els = document.querySelectorAll("a[href='" + url + "']");
+	//$(els).parent().addClass("current");
+
+	$('#contractsearch')
+	  .on('focus', function(){
+		  var $this = $(this);
+		  if($this.val() == 'Search here...'){
+			  $this.val('');
+		  }
+	  })
+	  .on('blur', function(){
+		  var $this = $(this);
+		  if($this.val() == ''){
+			  $this.val('Search here...');
+		  }
+	  });
+  
+
+	
+	$('#contractsearch').on('input', function() {
+		search();
+	});
+
+	function search() {
+		i = 0;
+		var term = $('#contractsearch').val().toLowerCase();
+		count = 0;
+		$('.products-list .product-item').each(function(i, obj) {
+			name = $(obj).find(".product-item-name a").text().toLowerCase();
+			if (name.indexOf(term) >= 0) {
+				$(obj).show();
+				count++;
+			} else {
+				$(obj).hide();
+			}
+		});
+		if (count == 0) {
+			$('#notfound').remove();
+			$('.products-list').append("<div id='notfound'>No Products Found</div>");
+		} else {
+			$('#notfound').remove();
+		}
+	}
+	
+	
+	$('#alladd').click(function(e){
+		$('.products-list .product-item').each(function(i, obj) {
+			index = i + 1;
+			if ($(obj).find(".qty").val() > 0) {
+				$(obj).find(".tocart").click();
+			}
+		})
+	})
+ 
+});
+</script>
+<?php
+use Magento\Framework\App\Action\Action;
+
+// @codingStandardsIgnoreFile
+
+?>
+<?php
+/**
+ * Product list template
+ *
+ * @var $block \Magento\Catalog\Block\Product\ListProduct
+ */
+?>
+<?php
+$collection = $block->getProductCollection();
+$_helper = $this->helper('Magento\Catalog\Helper\Output');
+?>
+	<div class="block block-dashboard-info">
+		<div class="block-title">
+			<?php if ($block->getGroupId() == "No Group"): ?>
+				<strong>Call for information on contract pricing and how to setup</strong></div></div>
+			<?php else: ?>
+				<strong>Showing contract prices for <b><?php echo $block->getGroupName(); ?></b></strong>
+		</div>
+	</div>
+	
+	
+	<?php if (!$collection->count()): ?>
+		<div class="message info empty"><div><?php /* @escapeNotVerified */ echo __('We can\'t find any products that you have contract pricing for.') ?></div></div>
+	<?php else: ?>
+		<input id="contractsearch" type="text" value="Search here..." />
+		
+		<div class="box box-information">
+            <strong class="box-title">
+                <span>Products</span>
+            </strong>
+		</div>	
+	<?php
+	$viewMode = 'list';
+	$image = 'category_page_list';
+	$showDescription = true;
+	$templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::FULL_VIEW;
+	$pos = $block->getPositioned();
+	?>
+		<div class="page-products">
+			<div class="products wrapper list products-list">
+				<?php $iterator = 1; ?>
+				<ol class="products list items product-items">
+					<?php foreach ($collection as $_product): ?>
+						<?php /* @escapeNotVerified */ echo($iterator++ == 1) ? '<li class="item product product-item">' : '</li><li class="item product product-item">' ?>
+						<div class="product-item-info" data-container="product-grid">
+							<?php
+							$productImage = $block->getImage($_product, $image);
+							if ($pos != null) {
+								$position = ' style="left:' . $productImage->getWidth() . 'px;'
+									. 'top:' . $productImage->getHeight() . 'px;"';
+							}
+							?>
+							<?php // Product Image ?>
+							<a href="<?php /* @escapeNotVerified */ echo $_product->getProductUrl() ?>" class="product photo product-item-photo" tabindex="-1">
+								<?php echo $productImage->toHtml(); ?>
+							</a>
+							<div class="product details product-item-details">
+								<?php
+									$_productNameStripped = $block->stripTags($_product->getName(), null, true);
+								?>
+								<strong class="product name product-item-name">
+									<a class="product-item-link"
+									   href="<?php /* @escapeNotVerified */ echo $block->getProductUrlCustom($_product) ?>">
+										<?php /* @escapeNotVerified */ echo $_helper->productAttribute($_product, $_product->getName(), 'name'); ?>
+									</a>
+									<p class="sku"><b>SKU: </b><?php /* @escapeNotVerified */ echo $_helper->productAttribute($_product, $_product->getSku(), 'sku'); ?></p>
+								</strong>
+								<br />
+								
+								
+								<?php echo $block->getProductDetailsHtml($_product); ?>
+								
+								<div class="product-item-inner">
+									<div class="product actions product-item-actions"<?php echo strpos($pos, $viewMode . '-actions') ? $position : ''; ?>>
+										<div class="actions-primary"<?php echo strpos($pos, $viewMode . '-primary') ? $position : ''; ?>>
+											<div class="actions-primary">
+											<?php /* @escapeNotVerified */ echo $block->getProductPrice($_product) ?>
+													<?php if ($_product->isSaleable()): ?>
+														<?php $postParams = $block->getAddToCartPostParams($_product); ?>
+														<form data-role="tocart-form" action="<?php /* @escapeNotVerified */ echo $postParams['action']; ?>" method="post">
+															<input type="hidden" name="product" value="<?php /* @escapeNotVerified */ echo $postParams['data']['product']; ?>">
+															<input type="hidden" name="<?php /* @escapeNotVerified */ echo Action::PARAM_NAME_URL_ENCODED; ?>" value="<?php /* @escapeNotVerified */ echo $postParams['data'][Action::PARAM_NAME_URL_ENCODED]; ?>">
+															<?php echo $block->getBlockHtml('formkey')?>
+															
+															<div class="control">
+																<div class="action primary qtybutton qtyminus<?php echo $iterator; ?>">-</div>
+																<input type="number" name="qty" id="qty<?php echo $iterator; ?>" maxlength="12"
+																style="width:40px; height: 35px; text-align: center;"
+																value="0"
+																title="<?php /* @escapeNotVerified */echo __('Qty'); ?>" class="input-text qty"
+																data-validate="<?php echo $block->escapeHtml(json_encode($block->getQuantityValidators())); ?>"
+																/>
+																<div class="action primary qtybutton qtyplus<?php echo$iterator; ?>">+</div>
+																<button type="submit"
+																	title="<?php echo $block->escapeHtml(__('Add to Basket')); ?>"
+																	class="action tocart primary">
+																<span><?php /* @escapeNotVerified */ echo __('Add to Basket') ?></span>
+															</button>
+															</div>
+															<script>
+															require(['jquery', 'jquery/ui'], function($){ 
+																$('.qtyplus<?php echo $iterator; ?>').click(function(e){
+																  currentVal = parseInt($('#qty<?php echo $iterator; ?>').val());
+																  $('#qty<?php echo $iterator; ?>').val(currentVal + 1);
+																  recalculate();
+																});
+																$('.qtyminus<?php echo $iterator; ?>').click(function(e){
+																   currentVal = parseInt($('#qty<?php echo $iterator; ?>').val());
+																   if (currentVal > 0)
+																	{
+																	  $('#qty<?php echo $iterator; ?>').val(currentVal - 1);
+																	  recalculate();
+																	}
+																});
+																document.getElementById('qty<?php echo $iterator; ?>').onchange = function() {
+																	recalculate();
+																}
+															
+																function recalculate() {
+																	total = 0;
+																	products = 0;
+																	saving = 0;
+																	  $('.products-list .product-item').each(function(i, obj) {
+																			
+																		price = $(obj).find(".price").html().replace(/[^0-9\.]+/g,'');
+																		oldprice = $(obj).find(".old-price .price").html().replace(/[^0-9\.]+/g,'');
+																		quantity = parseInt(($(obj).find(".qty").val()));
+																		linesaving = quantity * (oldprice - price);
+																		linetotal = price * quantity;
+																		saving += linesaving;
+																		products += quantity;
+																		total +=  linetotal;
+																		percentage = 100*saving/(total+saving);
+																	  })
+														
+																	$('#contractitemscount').html(products);
+																	$('#contractitemstotal').html("£" + total.toFixed(2));
+																	if (isNaN(percentage)) {percentage = 0;}
+																	$('#contractitemssaving').html("£" + saving.toFixed(2) + " / " + percentage.toFixed(2) + "%");
+																}
+																
+															});
+															</script>
+
+														</form>
+													<?php else: ?>
+														<?php if ($_product->isAvailable()): ?>
+															<div class="stock available"><span><?php /* @escapeNotVerified */ echo __('In stock') ?></span></div>
+														<?php else: ?>
+															<div class="stock unavailable"><span><?php /* @escapeNotVerified */ echo __('Out of stock') ?></span></div>
+														<?php endif; ?>
+													<?php endif; ?>
+												</div>
+										<div data-role="add-to-links" class="actions-secondary"<?php echo strpos($pos, $viewMode . '-secondary') ? $position : ''; ?>>
+											<?php if ($addToBlock = $block->getChildBlock('addto')): ?>
+												<?php echo $addToBlock->setProduct($_product)->getChildHtml(); ?>
+											<?php endif; ?>
+										</div>
+									</div>
+								</div>
+								
+							</div>
+						</div>
+						<?php echo($iterator == count($collection)+1) ? '</li>' : '' ?>
+					<?php endforeach; ?>
+				</ol>
+				<div class="summary">
+				<div class="block block-dashboard-info">
+					<div class="block-title">
+										<strong>Summary</strong>
+					</div>
+				</div>
+				<div class="col-3"><b>Items:</b><div id="contractitemscount">0</div></div>
+				<div class="col-3"><b>Total:</b><div id="contractitemstotal">£0.00</div></div>
+				<div class="col-3"><b>Saving:</b><div id="contractitemssaving">£0 / 0.00%</div></div>
+				</div>
+				<div class="action primary tocart" id="alladd">Add All to Cart</div>
+			</div>
+		</div>
+		<?php if (!$block->isRedirectToCartEnabled()) : ?>
+			<script type="text/x-magento-init">
+			{
+				"[data-role=tocart-form], .form.map.checkout": {
+					"catalogAddToCart": {}
+				}
+			}
+			</script>
+		<?php endif; ?>
+	<?php endif; ?>
+<?php endif; ?>
+	<script type="text/x-magento-init">
+		{
+			"#product_addtocart_form": {
+				"catalogAddToCart": {
+					"bindSubmit": true
+				}
+			}
+		}
+	</script>
